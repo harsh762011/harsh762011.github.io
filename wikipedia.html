@@ -1,0 +1,229 @@
+<!DOCTYPE html>  
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wikipedia Search</title>
+  <style>
+    /* Overall page styling with a red-themed gradient background */
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin: 20px;
+      background: linear-gradient(135deg, #ffe6e6, #ffcccc);
+    }
+    /* Search panel styling */
+    #searchPanel {
+      margin-bottom: 20px;
+    }
+    /* Stylish input field with red accents */
+    input {
+      width: 80%;
+      padding: 10px;
+      font-size: 16px;
+      border: 2px solid #d9534f; /* red border */
+      border-radius: 5px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    input:focus {
+      border-color: #c9302c;
+    }
+    input::placeholder {
+      color: #d9534f;
+      opacity: 0.7;
+    }
+    /* Suggestions container styling */
+    #suggestions {
+      margin: 10px auto;
+      width: 80%;
+      text-align: left;
+    }
+    .suggestion-item {
+      background-color: #ffe6e6;
+      padding: 8px;
+      margin: 4px;
+      border: 1px solid #d9534f;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .suggestion-item:hover {
+      background-color: #d9534f;
+      color: #fff;
+    }
+    /* Popular topics container styling */
+    #popularTopics {
+      margin-bottom: 20px;
+    }
+    .topic-btn {
+      padding: 10px 15px;
+      margin: 5px;
+      background-color: #d9534f;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s, transform 0.3s;
+    }
+    .topic-btn:hover {
+      background-color: #c9302c;
+      transform: translateY(-2px);
+    }
+    /* Display panel styling */
+    #display {
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: #fff;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+      text-align: left;
+      box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.2);
+      display: none; /* Hidden by default */
+    }
+    #display h2 {
+      margin-top: 0;
+      color: #d9534f; /* red heading */
+    }
+    #wikiImage {
+      max-width: 100%;
+      height: auto;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+    /* Loading text style */
+    .loading {
+      font-size: 18px;
+      color: #d9534f;
+    }
+    /* Read more button styling */
+    .read-more {
+      display: inline-block;
+      padding: 10px;
+      background-color: #d9534f;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      font-weight: bold;
+      margin-top: 10px;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .read-more:hover {
+      background-color: #c9302c;
+      transform: translateY(-3px);
+    }
+  </style>
+</head>
+<body>
+  <div id="header">
+    <!-- Popular Topics Section -->
+    <div id="popularTopics">
+      <button class="topic-btn" onclick="selectTopic('NEET')">NEET</button>
+      <button class="topic-btn" onclick="selectTopic('JEE Advanced')">JEE Advanced</button>
+      <button class="topic-btn" onclick="selectTopic('JEE Mains')">JEE Mains</button>
+    </div>
+    <!-- Search Panel -->
+    <div id="searchPanel">
+      <input type="text" id="sea" placeholder="Search Wikipedia..." onkeyup="jump()" />
+    </div>
+    <!-- Suggestions Container -->
+    <div id="suggestions"></div>
+    <div id="display"></div>
+  </div>
+
+  <script>
+    // Array of related topics for suggestions.
+    const relatedTopics = [
+      "NEET",
+      "JEE Advanced",
+      "JEE Mains",
+      "Medical Entrance",
+      "Engineering Entrance",
+      "NEET PG",
+      "JEE Main Tips",
+      "CBSE",
+      "ICSE"
+    ];
+    
+    // When a popular topic or suggestion is clicked, fill the search input and trigger the search.
+    function selectTopic(topic) {
+      document.getElementById("sea").value = topic;
+      jump();
+    }
+    
+    // The main function that fires on keyup in the search input.
+    function jump() {
+      const query = document.getElementById("sea").value.trim();
+      const display = document.getElementById("display");
+      const suggestions = document.getElementById("suggestions");
+      
+      // If query is too short, hide display and suggestions.
+      if (query.length < 2) {
+        display.style.display = "none";
+        suggestions.innerHTML = "";
+        return;
+      }
+      
+      // Filter related topics based on the query.
+      const filteredTopics = relatedTopics.filter(topic =>
+        topic.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      // If suggestions are available, display them.
+      if (filteredTopics.length > 0) {
+        suggestions.innerHTML = filteredTopics
+          .map(topic => `<div class="suggestion-item" onclick="selectTopic('${topic}')">${topic}</div>`)
+          .join("");
+      } else {
+        suggestions.innerHTML = "";
+      }
+      
+      // Show display panel with a loading message.
+      display.style.display = "block";
+      display.innerHTML = "<p class='loading'>🔎 Searching...</p>";
+      
+      // Perform Wikipedia API search.
+      const searchUrl = `https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=${query}&format=json&origin=*`;
+      const http = new XMLHttpRequest();
+      http.open("GET", searchUrl, true);
+      http.onreadystatechange = function () {
+        if (http.readyState == 4 && http.status == 200) {
+          const searchData = JSON.parse(http.responseText);
+          if (!searchData.query.search.length) {
+            display.innerHTML = "<p>No results found.</p>";
+            return;
+          }
+          
+          const title = searchData.query.search[0].title;
+          const contentUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`;
+          const contentHttp = new XMLHttpRequest();
+          contentHttp.open("GET", contentUrl, true);
+          contentHttp.onreadystatechange = function () {
+            if (contentHttp.readyState == 4 && contentHttp.status == 200) {
+              const contentData = JSON.parse(contentHttp.responseText);
+              const description = contentData.extract;
+              const paragraphs = description.split(". ").slice(0, 5).join(". ") + ".";
+              const highlightedText = paragraphs.replace(new RegExp(query, "gi"), match => `<b>${match}</b>`);
+              let imageTag = "";
+              if (contentData.thumbnail) {
+                imageTag = `<img id="wikiImage" src="${contentData.thumbnail.source}" alt="${title}" />`;
+              }
+              display.innerHTML = `
+                ${imageTag}
+                <h2>${title}</h2>
+                <p>${highlightedText}</p>
+                <a class="read-more" href="https://en.wikipedia.org/wiki/${title}" target="_blank">📖 Read More</a>
+              `;
+            }
+          };
+          contentHttp.send();
+        }
+      };
+      http.send();
+    }
+  </script>
+</body>
+</html>

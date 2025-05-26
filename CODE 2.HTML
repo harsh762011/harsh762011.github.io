@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JEE Test Code Selector</title>
+  <style>
+    body {
+      background-color: #fff0f0;
+      color: #800000;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      line-height: 1.6;
+    }
+    h1, h2, h3 {
+      color: #b30000;
+      text-align: center;
+    }
+    h3.subject-heading {
+      grid-column: 1 / -1;
+      margin: 20px 0 10px;
+      font-size: 1.5em;
+      font-weight: bold;
+      text-align: left;
+      border-bottom: 2px solid #ff4d4d;
+      padding-bottom: 5px;
+    }
+    h4.chapter-heading {
+      grid-column: 1 / -1;
+      margin: 10px 0;
+      font-size: 1.2em;
+      font-weight: bold;
+      text-align: left;
+    }
+    #testCodes {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px,1fr));
+      gap: 15px;
+      margin: 20px auto;
+      padding: 15px;
+      max-width: 1000px;
+      border: 1px solid #ff4d4d;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    #testCodes label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      padding: 5px;
+    }
+    #testCodes input[type="checkbox"] {
+      margin-right: 8px;
+      transform: scale(1.5);
+      width: 20px;
+      height: 20px;
+    }
+    .button-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    button {
+      background-color: #ff4d4d;
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      margin: 0 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #ff1a1a;
+    }
+    button:focus {
+      outline: 2px solid #b30000;
+      outline-offset: 2px;
+    }
+    @media (max-width: 600px) {
+      #testCodes {
+        grid-template-columns: 1fr;
+      }
+      button {
+        width: 100%;
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>JEE Mains & Advanced Test Code Selector</h1>
+  <h2 id="test-codes-label">Available Test Codes:</h2>
+  <div id="testCodes" role="group" aria-labelledby="test-codes-label"></div>
+  <div class="button-container">
+    <button onclick="saveSelectedCodes()" aria-label="Save selected test codes and proceed to test">Save Selected Codes</button>
+    <button onclick="clearSelections()" aria-label="Clear all selected test codes">Clear All</button>
+  </div>
+
+  <script>
+    const testGroups = [
+      {
+        subject: "Physics",
+        chapters: [
+          { heading: "Chapter 1: Kinematics (Class 11)", codes: ["140"] },
+          { heading: "Chapter 2: Laws of Motion (Class 11)", codes: ["141", "501", "502", "503", "504", "505", "506", "507", "508"] },
+          { heading: "Chapter 3: Rotational Motion (Class 11)", codes: ["142"] },
+          { heading: "Chapter 4: Gravitation (Class 11)", codes: ["143"] },
+          { heading: "Chapter 5: Thermodynamics (Class 11)", codes: ["144", "800", "801"] },
+          { heading: "Chapter 6: Work, Energy, and Power (Class 11)", codes: ["145", "601", "602", "603", "604", "605", "606", "607", "608", "609", "610", "615", "616", "617", "618", "619", "620", "621", "622", "623", "624"] },
+          { heading: "Chapter 7: Motion of System of Particles and Rigid Body (Class 11)", codes: ["146"] },
+          { heading: "Chapter 8: Oscillations (Class 11)", codes: ["147"] },
+          { heading: "Chapter 9: Mechanical Properties of Solids (Class 11)", codes: ["148"] },
+          { heading: "Chapter 10: Mechanical Properties of Fluids (Class 11)", codes: ["149"] },
+          { heading: "Chapter 11: Thermal Properties of Matter (Class 11)", codes: ["150"] },
+          { heading: "Chapter 12: Motion in a Straight Line (Class 11)", codes: ["415", "416", "417", "418", "419", "420", "421", "422", "423", "424", "425", "426", "427", "434"] },
+          { heading: "Chapter 13: Motion in a Plane (Class 11)", codes: ["400", "401", "402", "403", "404", "405", "406", "407", "408", "409", "410", "411", "412", "413", "414"] },
+          { heading: "Chapter 14: Kinetic Theory of Gases (Class 11)", codes: ["802"] },
+          { heading: "Chapter 15: Waves (Class 11)", codes: ["803"] },
+          { heading: "Chapter 16: Electrostatics (Class 12)", codes: ["151", "200", "804"] },
+          { heading: "Chapter 17: Current Electricity (Class 12)", codes: ["152", "201", "805"] },
+          { heading: "Chapter 18: Magnetic Effects of Current and Magnetism (Class 12)", codes: ["202", "806", "942", "944"] },
+          { heading: "Chapter 19: Electromagnetic Induction (Class 12)", codes: ["203", "569", "807"] },
+          { heading: "Chapter 20: Alternating Current (Class 12)", codes: ["204", "570", "808"] },
+          { heading: "Chapter 21: Electromagnetic Waves (Class 12)", codes: ["571", "809", "930"] },
+          { heading: "Chapter 22: Ray Optics and Optical Instruments (Class 12)", codes: ["572", "810", "931"] },
+          { heading: "Chapter 23: Wave Optics (Class 12)", codes: ["573", "811", "932"] },
+          { heading: "Chapter 24: Dual Nature of Matter and Radiation (Class 12)", codes: ["574", "812", "933"] },
+          { heading: "Chapter 25: Atoms (Class 12)", codes: ["575", "813", "934"] },
+          { heading: "Chapter 26: Nuclei (Class 12)", codes: ["576", "814", "935", "937", "938", "939", "940", "941", "945", "946", "947", "948", "949"] },
+          { heading: "Chapter 27: Semiconductor Electronics (Class 12)", codes: ["936"] },
+          { heading: "Chapter 28: Magnetism and Matter (Class 12)", codes: ["943"] }
+        ]
+      },
+      {
+        subject: "Chemistry",
+        chapters: [
+          { heading: "Physical Chemistry - Chapter 1: Solid State (Class 12)", codes: ["109"] },
+          { heading: "Physical Chemistry - Chapter 2: Solutions (Class 12)", codes: ["110"] },
+          { heading: "Physical Chemistry - Chapter 3: Electrochemistry (Class 12)", codes: ["111"] },
+          { heading: "Physical Chemistry - Chapter 4: Chemical Kinetics (Class 12)", codes: ["112", "412", "set23", "set24", "set25", "set26", "set27"] },
+          { heading: "Physical Chemistry - Chapter 5: Surface Chemistry (Class 12)", codes: ["157", "411"] },
+          { heading: "Physical Chemistry - Chapter 6: Structure of Atom (Class 11)", codes: ["Chapter6"] },
+          { heading: "Physical Chemistry - Chapter 7: States of Matter: Gases and Liquids (Class 11)", codes: ["Chapter8"] },
+          { heading: "Inorganic Chemistry - Chapter 8: p-Block Elements (Class 12)", codes: ["106", "158", "409"] },
+          { heading: "Inorganic Chemistry - Chapter 9: d- and f-Block Elements (Class 12)", codes: ["159", "408"] },
+          { heading: "Inorganic Chemistry - Chapter 10: Coordination Compounds (Class 12)", codes: ["160", "407"] },
+          { heading: "Inorganic Chemistry - Chapter 11: General Principles and Processes of Isolation of Elements (Class 12)", codes: ["410"] },
+          { heading: "Inorganic Chemistry - Chapter 12: Classification of Elements and Periodicity in Properties (Class 11)", codes: ["Chapter7"] },
+          { heading: "Inorganic Chemistry - Chapter 13: Hydrogen (Class 11)", codes: ["Chapter10"] },
+          { heading: "Inorganic Chemistry - Chapter 14: Redox Reactions (Class 11)", codes: ["Chapter9"] },
+          { heading: "Organic Chemistry - Chapter 15: Organic Chemistry - Some Basic Principles and Techniques (Class 11)", codes: ["107"] },
+          { heading: "Organic Chemistry - Chapter 16: Environmental Chemistry (Class 12)", codes: ["108"] },
+          { heading: "Organic Chemistry - Chapter 17: Haloalkanes and Haloarenes (Class 12)", codes: ["161", "406"] },
+          { heading: "Organic Chemistry - Chapter 18: Alcohols, Phenols, and Ethers (Class 12)", codes: ["162", "400"] },
+          { heading: "Organic Chemistry - Chapter 19: Aldehydes, Ketones, and Carboxylic Acids (Class 12)", codes: ["163", "401"] },
+          { heading: "Organic Chemistry - Chapter 20: Amines (Class 12)", codes: ["164", "402"] },
+          { heading: "Organic Chemistry - Chapter 21: Biomolecules (Class 12)", codes: ["165", "403"] },
+          { heading: "Organic Chemistry - Chapter 22: Polymers (Class 12)", codes: ["404"] },
+          { heading: "Organic Chemistry - Chapter 23: Chemistry in Everyday Life (Class 12)", codes: ["405"] }
+        ]
+      },
+      {
+        subject: "Mathematics",
+        chapters: [
+          { heading: "Class 11 - Chapter 1: Sets", codes: ["114"] },
+          { heading: "Class 11 - Chapter 2: Relations and Functions", codes: ["115"] },
+          { heading: "Class 11 - Chapter 3: Trigonometric Functions", codes: ["116"] },
+          { heading: "Class 11 - Chapter 4: Complex Numbers and Quadratic Equations", codes: ["117"] },
+          { heading: "Class 11 - Chapter 5: Linear Inequalities", codes: ["118"] },
+          { heading: "Class 11 - Chapter 6: Permutations and Combinations", codes: ["119"] },
+          { heading: "Class 11 - Chapter 7: Sequences and Series", codes: ["120"] },
+          { heading: "Class 11 - Chapter 8: Limits and Derivatives", codes: ["121"] },
+          { heading: "Class 11 - Chapter 9: Conic Sections", codes: ["122"] },
+          { heading: "Class 12 - Chapter 10: Continuity and Differentiability", codes: ["123"] },
+          { heading: "Class 12 - Chapter 11: Applications of Derivatives", codes: ["124"] },
+          { heading: "Class 12 - Chapter 12: Integrals", codes: ["125"] },
+          { heading: "Class 12 - Chapter 13: Applications of Integrals", codes: ["126"] }
+        ]
+      },
+      {
+        subject: "Biology (JEE Mains Only)",
+        chapters: [
+          { heading: "Chapter 1: Human Physiology (Class 11)", codes: ["246", "247", "248", "249", "Set_1", "Set_2", "Set_3", "Set_5", "Set_6", "Set_7", "Set_8", "Set_9"] },
+          { heading: "Chapter 2: Biotechnology (Class 12)", codes: ["Set_10"] },
+          { heading: "Chapter 3: Biomolecules (Class 12)", codes: ["165", "403"] }
+        ]
+      }
+    ];
+
+    function displayTestCodes() {
+      const testCodesDiv = document.getElementById("testCodes");
+      if (!testCodesDiv) {
+        console.error("Element with ID 'testCodes' not found.");
+        return;
+      }
+      testGroups.forEach(group => {
+        const subjectHeading = document.createElement("h3");
+        subjectHeading.textContent = group.subject;
+        subjectHeading.classList.add("subject-heading");
+        testCodesDiv.appendChild(subjectHeading);
+        group.chapters.forEach(chapter => {
+          const chapterHeading = document.createElement("h4");
+          chapterHeading.textContent = chapter.heading;
+          chapterHeading.classList.add("chapter-heading");
+          testCodesDiv.appendChild(chapterHeading);
+          chapter.codes.forEach(code => {
+            const checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.value = code;
+            checkbox.id = code;
+            checkbox.addEventListener('change', function() {
+              const checkedCount = document.querySelectorAll("#testCodes input[type='checkbox']:checked").length;
+              if (checkedCount > 5) {
+                alert("You cannot select more than 5 test codes.");
+                this.checked = false;
+              }
+            });
+            const label = document.createElement("label");
+            label.htmlFor = code;
+            label.textContent = code;
+            testCodesDiv.appendChild(checkbox);
+            testCodesDiv.appendChild(label);
+          });
+        });
+      });
+    }
+
+    function saveSelectedCodes() {
+      const selectedCodes = [];
+      const checkboxes = document.querySelectorAll("#testCodes input[type='checkbox']:checked");
+      checkboxes.forEach(checkbox => selectedCodes.push(checkbox.value));
+      console.log("Saving codes:", selectedCodes);
+      if (selectedCodes.length === 0) {
+        alert("Please select at least one test code before proceeding.");
+        return;
+      }
+      try {
+        sessionStorage.setItem("selectedCodes", JSON.stringify(selectedCodes));
+        console.log("Saved to sessionStorage:", sessionStorage.getItem("selectedCodes"));
+        window.location.href = "test.html";
+      } catch (e) {
+        alert("Error saving selections. Please ensure your browser allows session storage.");
+        console.error("Session storage error:", e);
+      }
+    }
+
+    function clearSelections() {
+      const checkboxes = document.querySelectorAll("#testCodes input[type='checkbox']");
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+      });
+    }
+
+    try {
+      displayTestCodes();
+    } catch (e) {
+      console.error("Error initializing test codes:", e);
+    }
+  </script>
+</body>
+</html>

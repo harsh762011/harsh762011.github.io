@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Results</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+  <style>
+    /* Overall Body Styling with a Red-Toned Gradient Background */
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, #ffe6e6, #ffcccc);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    /* Main Container Styling */
+    .container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      max-width: 800px;
+      width: 100%;
+    }
+    /* Headings */
+    h1, h2 {
+      color: #d9534f;  /* Red accent */
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    /* Summary and Section Styling */
+    .summary, .section {
+      margin-bottom: 20px;
+      padding: 15px;
+      border: 1px solid #f0f0f0;
+      border-left: 5px solid #d9534f;
+      border-radius: 5px;
+      background-color: #f9f9f9;
+    }
+    /* Question Formatting */
+    .question {
+      margin: 10px 0;
+    }
+    .question p {
+      margin: 5px 0;
+    }
+    .correct {
+      color: green;
+    }
+    .wrong {
+      color: red;
+    }
+    .left {
+      color: orange;
+    }
+    /* Button Styling */
+    button {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      background-color: #d9534f;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    button:hover {
+      background-color: #c9302c;
+      transform: translateY(-2px);
+    }
+    /* Horizontal Rule Styling */
+    hr {
+      border: 0;
+      border-top: 1px solid #ccc;
+      margin: 10px 0;
+    }
+  </style>
+  <script>
+    function loadResults() {
+      const testQuestions = JSON.parse(sessionStorage.getItem('testQuestions')) || [];
+      const userAnswers = JSON.parse(sessionStorage.getItem('userAnswers')) || [];
+  
+      const summaryContainer = document.getElementById('summary');
+      const wrongQuestionsContainer = document.getElementById('wrongQuestions');
+      const leftQuestionsContainer = document.getElementById('leftQuestions');
+  
+      let correctCount = 0;
+      let wrongCount = 0;
+      let leftCount = 0;
+  
+      testQuestions.forEach((question, index) => {
+        const userAnswer = userAnswers[index];
+        const correctAnswer = question.correct;
+  
+        if (userAnswer === "Left") {
+          leftCount++;
+          const leftQuestionHTML = `
+            <div class="question left">
+              <p><strong>Question:</strong> ${question.question}</p>
+              <p><strong>Correct Answer:</strong> ${correctAnswer}</p>
+            </div>
+            <hr>
+          `;
+          leftQuestionsContainer.innerHTML += leftQuestionHTML;
+        } else if (userAnswer !== correctAnswer) {
+          wrongCount++;
+          const wrongQuestionHTML = `
+            <div class="question wrong">
+              <p><strong>Question:</strong> ${question.question}</p>
+              <p><strong>Your Answer:</strong> ${userAnswer}</p>
+              <p><strong>Correct Answer:</strong> ${correctAnswer}</p>
+            </div>
+            <hr>
+          `;
+          wrongQuestionsContainer.innerHTML += wrongQuestionHTML;
+        } else {
+          correctCount++;
+        }
+      });
+  
+      // Display summary
+      summaryContainer.innerHTML = `
+        <p><strong>Total Questions:</strong> ${testQuestions.length}</p>
+        <p><strong>Correct Answers:</strong> <span class="correct">${correctCount}</span></p>
+        <p><strong>Wrong Answers:</strong> <span class="wrong">${wrongCount}</span></p>
+        <p><strong>Left Unanswered:</strong> <span class="left">${leftCount}</span></p>
+      `;
+  
+      // Handle empty sections
+      if (!wrongQuestionsContainer.innerHTML.trim()) {
+        wrongQuestionsContainer.innerHTML = "<p>No wrong answers. Great job!</p>";
+      }
+      if (!leftQuestionsContainer.innerHTML.trim()) {
+        leftQuestionsContainer.innerHTML = "<p>No questions were left unanswered.</p>";
+      }
+    }
+  
+    function retakeTest() {
+      window.location.href = 'test2.html'; // Update the path to your test page if necessary
+    }
+  </script>
+</head>
+<body onload="loadResults()">
+  <div class="container">
+    <h1>Test Results</h1>
+  
+    <!-- Summary Section -->
+    <div id="summary" class="summary">
+      <h2>Summary</h2>
+      <!-- Summary content will be populated by JavaScript -->
+    </div>
+  
+    <!-- Wrong Questions Section -->
+    <div class="section">
+      <h2>Wrong Questions</h2>
+      <div id="wrongQuestions"></div>
+    </div>
+  
+    <!-- Left Questions Section -->
+    <div class="section">
+      <h2>Left Questions</h2>
+      <div id="leftQuestions"></div>
+    </div>
+  
+    <!-- Retake Test Button -->
+    <button onclick="retakeTest()">Retake Test</button>
+  </div>
+</body>
+</html>

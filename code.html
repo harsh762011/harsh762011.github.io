@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Select Test Codes</title>
+  <style>
+    body {
+      background-color: #fff0f0;
+      color: #800000;
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      line-height: 1.6;
+    }
+    h1, h2, h3 {
+      color: #b30000;
+      text-align: center;
+    }
+    h3.chapter-heading {
+      grid-column: 1 / -1; /* Span across all columns in the grid */
+      margin: 10px 0;
+      font-size: 1.2em;
+      font-weight: bold;
+      text-align: left; /* Align left for better readability */
+    }
+    #testCodes {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 15px;
+      margin: 20px auto;
+      padding: 15px;
+      max-width: 800px;
+      border: 1px solid #ff4d4d;
+      border-radius: 8px;
+      background: #fafafa;
+    }
+    #testCodes label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      padding: 5px;
+    }
+    #testCodes input[type="checkbox"] {
+      margin-right: 8px;
+      transform: scale(1.5); /* Increased checkbox size */
+      width: 20px; /* Explicit width */
+      height: 20px; /* Explicit height */
+    }
+    .button-container {
+      text-align: center;
+      margin-top: 20px;
+    }
+    button {
+      background-color: #ff4d4d;
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      margin: 0 10px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #ff1a1a;
+    }
+    button:focus {
+      outline: 2px solid #b30000;
+      outline-offset: 2px;
+    }
+    @media (max-width: 600px) {
+      #testCodes {
+        grid-template-columns: 1fr;
+      }
+      button {
+        width: 100%;
+        margin: 10px 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Select Test Codes</h1>
+  <h2 id="test-codes-label">Available Test Codes:</h2>
+  <div id="testCodes" role="group" aria-labelledby="test-codes-label"></div>
+  <div class="button-container">
+    <button onclick="saveSelectedCodes()" aria-label="Save selected test codes and proceed to test">Save Selected Codes</button>
+    <button onclick="clearSelections()" aria-label="Clear all selected test codes">Clear All</button>
+  </div>
+
+  <script>
+    const testGroups = [
+      // Biology (Class 11 and Class 12)
+      { 
+        heading: "Class 11 Chapter 1: Animal Kingdom", 
+        codes: ["900", "911"] 
+      },
+      { 
+        heading: "Class 11 Chapter 3: Diversity in Living Organisms", 
+        codes: ["902", "912"] 
+      },
+      { 
+        heading: "Class 11 Chapter 4: Classification and Characteristics", 
+        codes: ["903", "913"] 
+      },
+      { 
+        heading: "Class 11 Chapter 5: Morphology of Flowering Plants", 
+        codes: ["Set_3", "Set_4", "Set_5", "Set_8", "Set_9"] 
+      },
+      { 
+        heading: "Class 11 Chapter 5: Lower Invertebrates and Systems", 
+        codes: ["904", "914"] 
+      },
+      { 
+        heading: "Class 11 Chapter 6: Additional Invertebrate Characteristics", 
+        codes: ["905", "915"] 
+      },
+      { 
+        heading: "Class 11 Chapter 7: Structural Organisation in Animals", 
+        codes: ["246", "247", "248", "249", "901", "912"] 
+      },
+      { 
+        heading: "Class 11 Chapter 7: Excretion and Osmoregulation", 
+        codes: ["906", "916"] 
+      },
+      { 
+        heading: "Class 11 Chapter 8: Reproduction in Animals", 
+        codes: ["907", "917"] 
+      },
+      { 
+        heading: "Class 11 Chapter 9: Nervous System and Coordination", 
+        codes: ["908", "918"] 
+      },
+      { 
+        heading: "Class 11 Chapter 10: Miscellaneous Biological Processes", 
+        codes: ["910", "919"] 
+      },
+      { 
+        heading: "Class 11 Chapter 18: Body Fluids and Circulation", 
+        codes: ["Set_1", "Set_2", "Set_3", "Set_5", "Set_6", "Set_7", "Set_8", "Set_9", "Set_10"] 
+      },
+      { 
+        heading: "Class 11 Chapter 19: Excretory Products and Their Elimination", 
+        codes: ["Set_16", "Set_17", "Set_19", "Set_20"] 
+      },
+      { 
+        heading: "Class 11 Chapter 20: Locomotion and Movement", 
+        codes: ["Set_11", "Set_12", "Set_13", "Set_14", "Set_15", "Set_18", "Set_19", "Set_21", "Set_22"] 
+      },
+      { 
+        heading: "Class 11 Chapter 21: Neural Control and Coordination", 
+        codes: ["Set_11", "Set_12", "Set_13", "Set_14", "Set_15", "Set_16", "Set_18", "Set_19"] 
+      },
+      { 
+        heading: "Class 12 Chapter 11: Biotechnology: Principles and Processes", 
+        codes: ["Set_3", "Set_4", "Set_5", "Set_7", "Set_8", "Set_9", "Set_10"] 
+      },
+
+      // Chemistry (Class 11 and Class 12)
+      { 
+        heading: "Class 11 Chapter 1: Some Basic Concepts of Chemistry", 
+        codes: ["Set_23", "Set_24", "Set_25", "Set_26", "Set_27", "Chemistry_Set_5", "Chemistry_Set_6"] 
+      },
+      { 
+        heading: "Class 11 Chapter 3: Classification of Elements and Periodicity in Properties", 
+        codes: ["Set_23", "Set_24", "Set_25", "Set_26", "Set_27"] 
+      },
+      { 
+        heading: "Class 11 Chapter 4: Chemical Bonding and Molecular Structure", 
+        codes: ["Set_23", "Set_24", "Set_25", "Set_26", "Set_27"] 
+      },
+      { 
+        heading: "Class 11 Chapter 7: Redox Reactions", 
+        codes: ["Set_23", "Set_24", "Set_25", "Set_26", "Set_27"] 
+      },
+      { 
+        heading: "Class 11 Chapter 10: The s-Block Elements", 
+        codes: ["Set_23"] 
+      },
+      { 
+        heading: "Class 11 Chapter 11: The p-Block Elements", 
+        codes: ["Set_24", "Set_26", "Set_27"] 
+      },
+      { 
+        heading: "Class 11 Chapter 13: Hydrocarbons", 
+        codes: ["Set_23", "Set_25"] 
+      },
+      { 
+        heading: "Class 12 Chapter 4: Chemical Kinetics", 
+        codes: ["Set_23", "Set_24", "Set_25", "Set_26", "Set_27"] 
+      },
+      { 
+        heading: "Class 12 Chapter 7: The p-Block Elements", 
+        codes: ["Set_23", "Set_24", "Set_25", "Set_26", "Set_27"] 
+      },
+      { 
+        heading: "Class 12 Chapter 8: The d- and f-Block Elements", 
+        codes: ["Set_23"] 
+      },
+
+      // Physics (Class 11 and Class 12)
+      { 
+        heading: "Class 11 Chapter 3: Motion in a Straight Line", 
+        codes: ["415", "416", "417", "418", "419", "420", "421", "422", "423", "424", "425", "426", "427", "428", "429", "430", "431", "432", "433", "434"] 
+      },
+      { 
+        heading: "Class 11 Chapter 4: Motion in a Plane", 
+        codes: ["400", "401", "402", "403", "404", "405", "406", "407", "408", "409", "410", "411", "412", "413", "414"] 
+      },
+      { 
+        heading: "Class 11 Chapter 5: Laws of Motion", 
+        codes: ["501", "502", "503", "504", "505", "506", "507", "508"] 
+      },
+      { 
+        heading: "Class 11 Chapter 5: Motion of System of Particles and Rigid Body", 
+        codes: ["513"] 
+      },
+      { 
+        heading: "Class 11 Chapter 6: Work, Energy, and Power", 
+        codes: ["601", "602", "603", "604", "605", "606", "607", "608", "609", "610", "615", "616", "617", "618", "619", "620", "621", "622", "623", "624"] 
+      },
+      { 
+        heading: "Class 11 Chapter 7: Gravitation", 
+        codes: ["514"] 
+      },
+      { 
+        heading: "Class 11 Chapter 8: Properties of Bulk Matter", 
+        codes: ["515"] 
+      },
+      { 
+        heading: "Class 11 Chapter 9: Thermodynamics", 
+        codes: ["516", "800", "801"] 
+      },
+      { 
+        heading: "Class 11 Chapter 10: Behaviour of Perfect Gas and Kinetic Theory", 
+        codes: ["517", "802"] 
+      },
+      { 
+        heading: "Class 11 Chapter 11: Oscillations and Waves", 
+        codes: ["518", "803"] 
+      },
+      { 
+        heading: "Class 12 Chapter 1: Electrostatics", 
+        codes: ["804"] 
+      },
+      { 
+        heading: "Class 12 Chapter 2: Current Electricity", 
+        codes: ["805"] 
+      },
+      { 
+        heading: "Class 12 Chapter 3: Magnetic Effects of Current and Magnetism", 
+        codes: ["806"] 
+      },
+      { 
+        heading: "Class 12 Chapter 4: Electromagnetic Induction", 
+        codes: ["569", "807"] 
+      },
+      { 
+        heading: "Class 12 Chapter 5: Alternating Currents", 
+        codes: ["570", "808"] 
+      },
+      { 
+        heading: "Class 12 Chapter 6: Electromagnetic Waves", 
+        codes: ["571", "809", "930"] 
+      },
+      { 
+        heading: "Class 12 Chapter 7: Ray Optics and Optical Instruments", 
+        codes: ["572", "810", "931"] 
+      },
+      { 
+        heading: "Class 12 Chapter 8: Wave Optics", 
+        codes: ["573", "811", "932"] 
+      },
+      { 
+        heading: "Class 12 Chapter 9: Dual Nature of Matter and Radiation", 
+        codes: ["574", "812", "933"] 
+      },
+      { 
+        heading: "Class 12 Chapter 10: Atoms", 
+        codes: ["575", "813", "934"] 
+      },
+      { 
+        heading: "Class 12 Chapter 11: Nuclei", 
+        codes: ["935", "937", "938", "939", "940", "941", "945", "946", "947", "948", "949"] 
+      },
+      { 
+        heading: "Class 12 Chapter 12: Electronic Devices", 
+        codes: ["576", "814"] 
+      },
+      { 
+        heading: "Class 12 Chapter 13: Semiconductor Electronics", 
+        codes: ["936"] 
+      },
+      { 
+        heading: "Class 12 Chapter 4: Moving Charges and Magnetism", 
+        codes: ["942", "944"] 
+      },
+      { 
+        heading: "Class 12 Chapter 5: Magnetism and Matter", 
+        codes: ["943"] 
+      }
+    ];
+
+    function displayTestCodes() {
+      const testCodesDiv = document.getElementById("testCodes");
+      if (!testCodesDiv) {
+        console.error("Element with ID 'testCodes' not found.");
+        return;
+      }
+      testGroups.forEach(group => {
+        const headingElement = document.createElement("h3");
+        headingElement.textContent = group.heading;
+        headingElement.classList.add("chapter-heading");
+        testCodesDiv.appendChild(headingElement);
+        group.codes.forEach(code => {
+          const checkbox = document.createElement("input");
+          checkbox.type = "checkbox";
+          checkbox.value = code;
+          checkbox.id = code;
+          checkbox.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll("#testCodes input[type='checkbox']:checked").length;
+            if (checkedCount > 12) {
+              alert("You cannot select more than 12 test codes.");
+              this.checked = false;
+            }
+          });
+          const label = document.createElement("label");
+          label.htmlFor = code;
+          label.textContent = code;
+          testCodesDiv.appendChild(checkbox);
+          testCodesDiv.appendChild(label);
+        });
+      });
+    }
+
+    function saveSelectedCodes() {
+      const selectedCodes = [];
+      const checkboxes = document.querySelectorAll("#testCodes input[type='checkbox']:checked");
+      checkboxes.forEach(checkbox => selectedCodes.push(checkbox.value));
+      console.log("Saving codes:", selectedCodes);
+      if (selectedCodes.length === 0) {
+        alert("Please select at least one test code before proceeding.");
+        return;
+      }
+      try {
+        sessionStorage.setItem("selectedCodes", JSON.stringify(selectedCodes));
+        console.log("Saved to sessionStorage:", sessionStorage.getItem("selectedCodes"));
+        window.location.href = "test.html";
+      } catch (e) {
+        alert("Error saving selections. Please ensure your browser allows session storage.");
+        console.error("Session storage error:", e);
+      }
+    }
+
+    function clearSelections() {
+      const checkboxes = document.querySelectorAll("#testCodes input[type='checkbox']");
+      checkboxes.forEach(checkbox => {
+        checkbox.checked = false;
+      });
+    }
+
+    try {
+      displayTestCodes();
+    } catch (e) {
+      console.error("Error initializing test codes:", e);
+    }
+  </script>
+</body>
+</html>

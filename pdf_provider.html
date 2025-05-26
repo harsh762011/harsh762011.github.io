@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- Responsive Meta Tag -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Advanced PDF Search Engine</title>
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700&display=swap" rel="stylesheet">
+  <style>
+    /* Universal Reset */
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      /* Red-themed gradient background */
+      background: linear-gradient(135deg, #ffe6e6, #ffcccc);
+      color: #333;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    /* Search Container */
+    .search-container {
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 1.8em;
+      color: #d9534f; /* Red heading */
+    }
+
+    /* Form Elements */
+    input, select, button {
+      width: calc(100% - 22px);
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+    input:focus, select:focus {
+      outline: none;
+      border-color: #d9534f; /* Red border on focus */
+      transform: scale(1.02);
+    }
+    button {
+      background-color: #d9534f; /* Red button */
+      color: #fff;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+    button:hover {
+      background-color: #c9302c; /* Darker red on hover */
+      transform: scale(1.02);
+    }
+
+    /* Suggestions Dropdown */
+    .suggestions {
+      position: absolute;
+      top: 70px;
+      left: 10px;
+      right: 10px;
+      background: #fff;
+      border: 1px solid #d9534f; /* Red border */
+      border-top: none;
+      z-index: 1000;
+      max-height: 200px;
+      overflow-y: auto;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease;
+    }
+    .suggestions.show {
+      opacity: 1;
+      visibility: visible;
+    }
+    .suggestions div {
+      padding: 8px;
+      cursor: pointer;
+    }
+    .suggestions div:hover {
+      background-color: #ffcccc; /* Light red background on hover */
+    }
+  </style>
+</head>
+<body>
+  <div class="search-container">
+    <h1>Search for Free PDFs</h1>
+    <input type="text" id="query" placeholder="Enter PDF title or keyword" autocomplete="off">
+    <div id="suggestions" class="suggestions"></div>
+    <select id="source">
+      <option value="pdfdrive">PDFDrive</option>
+      <option value="google">Google Books</option>
+      <option value="openlibrary">Open Library</option>
+      <option value="libgen">Library Genesis</option>
+      <option value="academia">Academia.edu</option>
+      <option value="internetarchive">Internet Archive</option>
+      <option value="pdfbooksworld">PDFBooksWorld</option>
+      <option value="bookboon">Bookboon</option>
+      <option value="researchgate">ResearchGate</option>
+    </select>
+    <select id="category">
+      <option value="">All Categories</option>
+      <option value="science">Science</option>
+      <option value="math">Mathematics</option>
+      <option value="history">History</option>
+      <option value="technology">Technology</option>
+      <option value="engineering">Engineering</option>
+      <option value="medical">Medical</option>
+    </select>
+    <input type="number" id="year" placeholder="Year (optional)" min="1900" max="2025">
+    <button id="searchBtn">Search</button>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const searchBtn = document.getElementById('searchBtn');
+      const queryInput = document.getElementById('query');
+      const sourceSelect = document.getElementById('source');
+      const categorySelect = document.getElementById('category');
+      const yearInput = document.getElementById('year');
+      const suggestionsDiv = document.getElementById('suggestions');
+
+      // Sample auto-suggestions (extend as needed)
+      const sampleSuggestions = [
+        "NCERT Physics Class 11", "Organic Chemistry PDF", "History of India",
+        "Mathematics for JEE", "Computer Science Basics", "AI & Machine Learning",
+        "Modern Physics Concepts", "Medical Biochemistry", "Electrical Engineering Notes",
+        "Mechanical Engineering Handbook"
+      ];
+
+      // Show auto-suggestions as the user types
+      queryInput.addEventListener("input", function () {
+        const query = queryInput.value.toLowerCase();
+        suggestionsDiv.innerHTML = "";
+      
+        if (!query) {
+          suggestionsDiv.classList.remove("show");
+          return;
+        }
+      
+        const filteredSuggestions = sampleSuggestions.filter(suggestion =>
+          suggestion.toLowerCase().includes(query)
+        );
+      
+        filteredSuggestions.forEach(suggestion => {
+          const div = document.createElement("div");
+          div.textContent = suggestion;
+          div.onclick = function () {
+            queryInput.value = suggestion;
+            suggestionsDiv.classList.remove("show");
+          };
+          suggestionsDiv.appendChild(div);
+        });
+      
+        if (filteredSuggestions.length) {
+          suggestionsDiv.classList.add("show");
+        } else {
+          suggestionsDiv.classList.remove("show");
+        }
+      });
+      
+      // Hide suggestions when clicking outside
+      document.addEventListener("click", function (event) {
+        if (!suggestionsDiv.contains(event.target) && event.target !== queryInput) {
+          suggestionsDiv.classList.remove("show");
+        }
+      });
+      
+      // Build the search URL and open it in a new tab
+      function performSearch() {
+        let query = queryInput.value.trim();
+        const source = sourceSelect.value;
+        const category = categorySelect.value;
+        const year = yearInput.value.trim();
+      
+        if (query === "") return;
+      
+        let searchQuery = query;
+        if (category) searchQuery += ` ${category}`;
+        if (year) searchQuery += ` ${year}`;
+      
+        let searchURL = "";
+      
+        // Construct search URL based on provider
+        switch (source) {
+          case "pdfdrive":
+            searchURL = `https://www.pdfdrive.com/search?q=${encodeURIComponent(searchQuery)}`;
+            break;
+          case "google":
+            searchURL = `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}+filetype:pdf`;
+            break;
+          case "openlibrary":
+            searchURL = `https://openlibrary.org/search?q=${encodeURIComponent(searchQuery)}`;
+            break;
+          case "libgen":
+            searchURL = `https://libgen.is/search.php?req=${encodeURIComponent(searchQuery)}`;
+            break;
+          case "academia":
+            searchURL = `https://www.academia.edu/search?q=${encodeURIComponent(searchQuery)}`;
+            break;
+          case "internetarchive":
+            searchURL = `https://archive.org/search.php?query=${encodeURIComponent(searchQuery)}`;
+            break;
+          case "pdfbooksworld":
+            searchURL = `https://www.pdfbooksworld.com/search?query=${encodeURIComponent(searchQuery)}`;
+            break;
+          case "bookboon":
+            searchURL = `https://bookboon.com/en/search?search=${encodeURIComponent(searchQuery)}`;
+            break;
+          case "researchgate":
+            searchURL = `https://www.researchgate.net/search?q=${encodeURIComponent(searchQuery)}`;
+            break;
+          default:
+            searchURL = `https://www.pdfdrive.com/search?q=${encodeURIComponent(searchQuery)}`;
+        }
+      
+        window.open(searchURL, "_blank");
+      }
+      
+      searchBtn.addEventListener("click", performSearch);
+      queryInput.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") performSearch();
+      });
+    });
+  </script>
+</body>
+</html>
