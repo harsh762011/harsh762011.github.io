@@ -21,16 +21,6 @@
             <textarea id="noteInput" class="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" rows="4" placeholder="Enter your study notes (max 500 characters)" maxlength="500"></textarea>
             <label class="block text-gray-700 mt-2 mb-1">Add images (optional, max 5, JPEG/PNG, <1MB each)</label>
             <input id="imageInput" type="file" accept="image/jpeg,image/png" multiple class="w-full p-2 border rounded-md">
-            <div class="mt-2">
-                <label class="inline-flex items-center">
-                    <input type="radio" name="visibility" value="public" checked class="form-radio">
-                    <span class="ml-2">Public</span>
-                </label>
-                <label class="inline-flex items-center ml-6">
-                    <input type="radio" name="visibility" value="private" class="form-radio">
-                    <span class="ml-2">Private</span>
-                </label>
-            </div>
             <button id="publishBtn" class="mt-2 w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600">Publish Note</button>
         </div>
 
@@ -92,7 +82,6 @@
             notesContainer.innerHTML = '';
 
             const filteredNotes = notes.filter(note => 
-                (note.visibility === 'public' || (note.visibility === 'private' && note.sessionId === sessionId)) &&
                 note.content.toLowerCase().includes(filter.toLowerCase())
             );
 
@@ -107,7 +96,6 @@
                 noteElement.innerHTML = `
                     <div class="flex justify-between items-center mb-2">
                         <p class="text-gray-800">${note.content}</p>
-                        <span class="text-sm text-gray-500">${note.visibility === 'private' ? 'Private' : 'Public'}</span>
                     </div>
                     <div class="mt-2 grid grid-cols-2 gap-2">
                         ${note.images && note.images.length > 0 ? note.images.map((img, imgIndex) => `
@@ -139,16 +127,6 @@
                         </div>
                         <label class="block text-gray-700 mt-2 mb-1">Add new images (optional, max 5 total, JPEG/PNG, <1MB each)</label>
                         <input id="editImageInput${note.id}" type="file" accept="image/jpeg,image/png" multiple class="w-full p-2 border rounded-md">
-                        <div class="mt-2">
-                            <label class="inline-flex items-center">
-                                <input type="radio" name="editVisibility${note.id}" value="public" ${note.visibility === 'public' ? 'checked' : ''} class="form-radio">
-                                <span class="ml-2">Public</span>
-                            </label>
-                            <label class="inline-flex items-center ml-6">
-                                <input type="radio" name="editVisibility${note.id}" value="private" ${note.visibility === 'private' ? 'checked' : ''} class="form-radio">
-                                <span class="ml-2">Private</span>
-                            </label>
-                        </div>
                         <div class="mt-2 flex space-x-2">
                             <button onclick="saveEdit('${note.id}')" id="saveBtn${note.id}" class="bg-blue-500 text-white py-1 px-4 rounded-md hover:bg-blue-600">Save</button>
                             <button onclick="cancelEdit('${note.id}')" class="bg-gray-500 text-white py-1 px-4 rounded-md hover:bg-gray-600">Cancel</button>
@@ -170,7 +148,6 @@
         document.getElementById('publishBtn').addEventListener('click', () => {
             const noteInput = document.getElementById('noteInput');
             const imageInput = document.getElementById('imageInput');
-            const visibility = document.querySelector('input[name="visibility"]:checked').value;
             const content = noteInput.value.trim();
 
             if (!content) {
@@ -190,7 +167,6 @@
                 liked: false, 
                 comments: [], 
                 sessionId, 
-                visibility, 
                 images: [] 
             };
 
@@ -240,11 +216,7 @@
             const note = notes[noteIndex];
             const shareText = `Check out my study note: ${note.content}${note.images && note.images.length > 0 ? ` (${note.images.length} image${note.images.length > 1 ? 's' : ''} included)` : ''}`;
             navigator.clipboard.writeText(shareText).then(() => {
-                if (note.visibility === 'private') {
-                    showStatus('Note copied to clipboard! This is a private note, so it’s only visible to you in this browser.');
-                } else {
-                    showStatus('Note copied to clipboard! This is a public note, visible to everyone. Images cannot be shared via clipboard.');
-                }
+                showStatus('Note copied to clipboard! This is a public note, visible to everyone. Images cannot be shared via clipboard.');
             });
         }
 
@@ -326,12 +298,6 @@
                 const editNoteInput = document.getElementById(`editNoteInput${noteId}`);
                 const editImageInput = document.getElementById(`editImageInput${noteId}`);
                 const saveBtn = document.getElementById(`saveBtn${noteId}`);
-                const visibilityInput = document.querySelector(`input[name="editVisibility${noteId}"]:checked`);
-                if (!visibilityInput) {
-                    showStatus('Please select visibility (public/private)!', true);
-                    return;
-                }
-                const visibility = visibilityInput.value;
                 const content = editNoteInput.value.trim();
 
                 if (!content) {
@@ -360,7 +326,6 @@
                             if (loadedImages === files.length) {
                                 notes[noteIndex].content = content;
                                 notes[noteIndex].images = [...(notes[noteIndex].images || []), ...newImages];
-                                notes[noteIndex].visibility = visibility;
                                 notes[noteIndex].timestamp = new Date().toISOString();
                                 localStorage.setItem('studyNotes', JSON.stringify(notes));
                                 editImageInput.value = '';
@@ -374,7 +339,6 @@
                     });
                 } else {
                     notes[noteIndex].content = content;
-                    notes[noteIndex].visibility = visibility;
                     notes[noteIndex].timestamp = new Date().toISOString();
                     localStorage.setItem('studyNotes', JSON.stringify(notes));
                     editImageInput.value = '';
@@ -412,6 +376,8 @@
                 console.log('Session ID mismatch:', notes[noteIndex].sessionId, sessionId);
             }
         }
+
+        //彼此
 
         // Cancel edit
         function cancelEdit(noteId) {
